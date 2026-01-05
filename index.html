@@ -2,41 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turnstile Test</title>
+    <title>Vercel + Turnstile</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+        .form-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+    </style>
 </head>
 <body>
-    <h1>Cloudflare Turnstile Example</h1>
-    
-    <form id="login-form">
-        <input type="text" name="user" placeholder="Name" required>
-        <br><br>
-
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAACKnsP5rPQre9cgH"></div>
-        
-        <br>
-        <button type="submit">Verify & Submit</button>
-    </form>
-
-    <p id="message"></p>
+    <div class="form-container">
+        <h2>Secure Form</h2>
+        <form id="captcha-form">
+            <input type="email" placeholder="Email" required><br><br>
+            
+            <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY"></div>
+            
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        <p id="status"></p>
+    </div>
 
     <script>
-        const form = document.getElementById('login-form');
-        form.onsubmit = async (e) => {
+        document.getElementById('captcha-form').onsubmit = async (e) => {
             e.preventDefault();
-            const formData = new FormData(form);
+            const status = document.getElementById('status');
+            const formData = new FormData(e.target);
             const token = formData.get('cf-turnstile-response');
 
-            const response = await fetch('/api/verify', {
+            status.innerText = "Verifying...";
+
+            const res = await fetch('https://checkcloud.overwrite249.workers.dev/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token })
+                body: JSON.stringify({ token }),
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            const result = await response.json();
-            document.getElementById('message').innerText = result.success ? 
-                "✅ Verified!" : "❌ Failed verification.";
+            const data = await res.json();
+            status.innerText = data.success ? "✅ Success!" : "❌ Verification Failed";
         };
     </script>
 </body>

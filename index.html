@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnstile Test</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+    <h1>Cloudflare Turnstile Example</h1>
+    
+    <form id="login-form">
+        <input type="text" name="user" placeholder="Name" required>
+        <br><br>
+
+        <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY"></div>
+        
+        <br>
+        <button type="submit">Verify & Submit</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        const form = document.getElementById('login-form');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const token = formData.get('cf-turnstile-response');
+
+            const response = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+
+            const result = await response.json();
+            document.getElementById('message').innerText = result.success ? 
+                "✅ Verified!" : "❌ Failed verification.";
+        };
+    </script>
+</body>
+</html>
